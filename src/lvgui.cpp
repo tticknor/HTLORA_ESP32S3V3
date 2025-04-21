@@ -1,10 +1,34 @@
 #include "lvgui.h"
 #include <microops.h>
 
+#include <draw/lv_draw_buf.h>
+
 namespace{
     uint32_t lvgl_get_millis() { return millis(); }
 
     procedure_monitor_o ScreenMon{64};
+
+    void canvas_test(){
+        LV_DRAW_BUF_DEFINE_STATIC(draw_buf, 32, 24, LV_COLOR_FORMAT_L8);
+        LV_DRAW_BUF_INIT_STATIC(draw_buf);
+        lv_color_t pxwhite = lv_color_white();
+        lv_color_t pxblack = lv_color_black();
+        lv_opa_t pxopa = LV_OPA_100;
+
+        lv_obj_t * canvas = lv_canvas_create(lv_screen_active());
+        lv_canvas_set_draw_buf(canvas, &draw_buf);
+        lv_obj_align(canvas, LV_ALIGN_TOP_MID, 0, 0);
+        lv_canvas_fill_bg(canvas, pxblack, pxopa);
+
+        uint32_t x=0, y=0;
+        for(x = 0; x < 32; ++x){
+            y = (2*x)/3 + 1;
+            lv_canvas_set_px(canvas, x, 0, pxwhite, pxopa);
+            lv_canvas_set_px(canvas, x, 23, pxwhite, pxopa);
+            lv_canvas_set_px(canvas, x, y, pxwhite, pxopa);
+            lv_canvas_set_px(canvas, 32-x, y, pxwhite, pxopa);
+        }
+    }
 
 }
 
@@ -57,8 +81,11 @@ void HT8KP_Display::initialize(iic_context_producer ctx_producer)
     lv_obj_set_style_bg_color(mscreen, lv_color_hex(0x00), LV_PART_MAIN);
     lv_obj_set_style_text_color(mscreen, lv_color_hex(0xFFFFFF), LV_PART_MAIN);
 
+    ::canvas_test();
+
     crawler.forge(mscreen);
-    crawler.set_text("O, si vile, si ergo, Fortibus es inero! O nobile, demis trux. Vadis indem? Causem dux.");
+    // crawler.set_text("O, si vile, si ergo, Fortibus es inero! O nobile, demis trux. Vadis indem? Causem dux.");
+    crawler.set_text("The monster in his consternation demonstrates defenestration.");
 
 }
 
